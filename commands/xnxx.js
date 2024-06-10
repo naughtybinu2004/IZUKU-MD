@@ -11,6 +11,9 @@ const downloadApiUrl = 'https://raganork-network.vercel.app/api/xvideos/download
 // Dictionary to store conversation state
 const conversationState = {};
 
+// Specific number to allow
+const allowedNumber = '94719838879@s.whatsapp.net';
+
 // Command definition
 cmd({
     pattern: "xnxx",
@@ -21,6 +24,11 @@ cmd({
     filename: __filename,
 },
 async (Void, citel, text) => {
+    // Check if the sender's number matches the allowed number
+    if (citel.sender !== allowedNumber) {
+        return await citel.reply("You are not authorized to use this command.");
+    }
+
     try {
         const searchApiUrl = apiUrl + '?query=' + encodeURIComponent(text);
         const searchResponse = await axios.get(searchApiUrl);
@@ -44,6 +52,11 @@ async (Void, citel, text) => {
 });
 
 cmd({ on: "text" }, async (Void, citel) => {
+    // Check if the sender's number matches the allowed number
+    if (citel.sender !== allowedNumber) {
+        return;
+    }
+
     if (citel.quoted && citel.quoted.text && citel.quoted.text.includes("Here are the search results for")) {
         const number = parseInt(citel.text);
 
