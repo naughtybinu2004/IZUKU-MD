@@ -61,6 +61,63 @@ cmd({
 
     )
      //---------------------------------------------------------------------------
+cmd({
+    pattern: "pdf",
+    desc: "Downloads a PDF from a direct URL and sends it.",
+    category: "downloader",
+    filename: __filename,
+    use: '<add direct PDF URL>',
+},
+async (Void, citel, text) => {
+    if (!text) return citel.reply("*Please provide a direct URL to the PDF*");
+
+    const getRandom = (ext) => { return `${Math.floor(Math.random() * 10000)}${ext}`; };
+    let randomName = getRandom(".pdf");
+    const filePath = `./${randomName}`;
+
+    try {
+        const url = text.trim();
+        
+        // Validate URL
+        if (!url.match(/^https?:\/\/.*\.pdf$/i)) {
+            return citel.reply("*Please provide a valid direct URL to a PDF file*");
+        }
+
+        // Download the PDF
+        const response = await axios.get(url, { responseType: 'stream' });
+        const writer = fs.createWriteStream(filePath);
+        response.data.pipe(writer);
+
+        writer.on('finish', async () => {
+            let buttonMessage = {
+                document: fs.readFileSync(filePath),
+                mimetype: 'application/pdf',
+                fileName: `${randomName}`,
+                caption: "*Here is your requested PDF*"
+            };
+            await Void.sendMessage(citel.chat, buttonMessage, { quoted: citel });
+            console.log('File downloaded and sent successfully');
+            fs.unlink(filePath, (err) => {
+                if (err) console.error('Error deleting file:', err);
+                else console.log('File deleted successfully');
+            });
+        });
+
+        writer.on('error', (error) => {
+            console.error('Error downloading the file:', error);
+            fs.unlink(filePath, (err) => {
+                if (err) console.error('Error deleting file:', err);
+            });
+            citel.reply('*PDF not found or download failed, sorry*');
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        citel.reply('*PDF not found or download failed, sorry*');
+    }
+});
+
+
+//--------------------------------------------------------------
      cmd({
         pattern: "ydesc",
         desc: "Gives descriptive info of query from youtube..",
