@@ -61,10 +61,6 @@ cmd({
 
     )
      //---------------------------------------------------------------------------
-const axios = require('axios');
-const fs = require('fs');
-const { cmd } = require('your-cmd-handler'); // Adjust this to your actual command handler
-
 cmd({
     pattern: "pdf",
     desc: "Downloads a PDF from a direct URL and sends it.",
