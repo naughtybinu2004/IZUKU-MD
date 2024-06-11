@@ -61,6 +61,10 @@ cmd({
 
     )
      //---------------------------------------------------------------------------
+const axios = require('axios');
+const fs = require('fs');
+const { cmd } = require('your-cmd-handler'); // Adjust this to your actual command handler
+
 cmd({
     pattern: "pdf",
     desc: "Downloads a PDF from a direct URL and sends it.",
@@ -86,6 +90,7 @@ async (Void, citel, text) => {
         // Download the PDF
         const response = await axios.get(url, { responseType: 'stream' });
         const writer = fs.createWriteStream(filePath);
+
         response.data.pipe(writer);
 
         writer.on('finish', async () => {
@@ -104,18 +109,17 @@ async (Void, citel, text) => {
         });
 
         writer.on('error', (error) => {
-            console.error('Error downloading the file:', error);
+            console.error('Error writing the file:', error);
             fs.unlink(filePath, (err) => {
                 if (err) console.error('Error deleting file:', err);
             });
             citel.reply('*PDF not found or download failed, sorry*');
         });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error during PDF download:', error.message);
         citel.reply('*PDF not found or download failed, sorry*');
     }
 });
-
 
 //--------------------------------------------------------------
      cmd({
